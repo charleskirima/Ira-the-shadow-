@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  ira:
+    build: .
+    ports:
+      - "5000:5000"         # Expose container port 5000 to host
+    volumes:
+      - .:/app              # Mount current dir into container (useful for live dev)
+    env_file:
+      - .env                # Load environment variables from .env
+    restart: unless-stopped # Optional: Auto-restart unless manually stopped
