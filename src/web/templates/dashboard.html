@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="dashboard" class="dashboard">
+    <h2>Your Daily Companion</h2>
+    <style>:root {
+    --primary-color: #4f46e5;
+    --accent-color: #06b6d4;
+    --background: #f0f4f8;
+    --card-bg: #ffffff;
+    --button-hover: #4338ca;
+    --button-disabled: #a5b4fc;
+    --button-focus-ring: rgba(79, 70, 229, 0.5);
+}
+
+button {
+    background: var(--primary-color);
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+    background: var(--button-hover);
+}
+
+button:disabled {
+    background: var(--button-disabled);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+button:focus {
+    outline: 2px solid var(--button-focus-ring);
+    outline-offset: 2px;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f3f5f9;
+    color: #333;
+}
+
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 220px;
+    background-color: #1f2937;
+    color: #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    margin-bottom: 16px;
+}
+
+.sidebar a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    display: block;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar a:hover {
+    background-color: #374151;
+}
+
+.main-panel {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}</style>
+
+    <!-- Chatbox -->
+    <div class="chatbox">
+        <textarea id="userMessage" placeholder="How are you feeling today?"></textarea>
+        <button onclick="sendMessage()">Send</button>
+        <div id="chatResponses"></div>
+    </div>
+
+    <!-- Daily Reports -->
+    <div id="dailyReports">
+        <!-- Morning / Midday / Evening reports will be injected here -->
+    </div>
+
+    <!-- Calendar Linking -->
+    <button onclick="linkCalendar()">📅 Link Google Calendar</button>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        if ('serviceWorker' in navigator) {
+            await navigator.serviceWorker.register("/sw.js");
+        }
+
+        if (Notification.permission !== "granted") {
+            const permission = await Notification.requestPermission();
+            if (permission !== "granted") return alert("Please enable notifications.");
+        }
+
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: "{{ vapid_public_key }}"
+        });
+
+        await fetch("/push/subscribe", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ subscription: sub })
+        });
+    } catch (err) {
+        console.error("Push subscription failed:", err);
+    }
+});
+
+function linkCalendar() {
+    window.location.href = "/calendar/authorize";
+}
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{
+  "name": "IRA Companion",
+  "short_name": "IRA",
+  "id": "/?source=pwa",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "rgba(255, 45, 85, 0.4)",
+  "theme_color": "#111827",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "en",
+  "description": "IRA is your holistic AI life assistant — mental, emotional, physical, spiritual, and financial guidance all in one.",
+  "categories": ["productivity", "health", "wellness", "lifestyle"],
+  "icons": [
+    {
+      "src": "/static/images/logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/logo-256.png",
+      "type": "image/png",
+      "sizes": "256x256",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ]
+}

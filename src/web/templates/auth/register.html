@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="register-form">
+    <h2>Sign Up</h2>
+    <input type="text" id="reg-username" placeholder="Username" required />
+    <input type="password" id="reg-password" placeholder="Password" required />
+    <button id="register-btn" onclick="registerUser()">Register</button>
+    <p id="register-error" style="color:red;"></p>
+</div>
+
+<script src="{{ url_for('static', filename='js/csrf.js') }}"></script>
+<script>
+async function registerUser() {
+    const username = document.getElementById("reg-username").value.trim();
+    const password = document.getElementById("reg-password").value;
+    const errorMsg = document.getElementById("register-error");
+    const button = document.getElementById("register-btn");
+
+    if (!username || !password) {
+        errorMsg.textContent = "Username and password are required.";
+        return;
+    }
+
+    errorMsg.textContent = "";
+    button.disabled = true;
+
+    try {
+        const csrfToken = await getCSRFToken();
+
+        const registerRes = await fetch("/auth/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (!registerRes.ok) {
+            throw new Error("Username may already exist or invalid input.");
+        }
+
+        const loginRes = await fetch("/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (!loginRes.ok) {
+            throw new Error("Auto-login failed after registration.");
+        }
+
+        const data = await loginRes.json();
+        localStorage.setItem("token", data.access_token);
+        window.location.href = "/dashboard";
+    } catch (err) {
+        errorMsg.textContent = err.message;
+    } finally {
+        button.disabled = false;
+    }
+}
+</script>
+{% endblock %}

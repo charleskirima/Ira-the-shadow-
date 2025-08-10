@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-form">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button id="login-btn" onclick="loginUser()">Login</button>
+    <p id="login-error" style="color:red;"></p>
+</div>
+
+<script src="{{ url_for('static', filename='js/csrf.js') }}"></script>
+<script>
+async function loginUser() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const errorMsg = document.getElementById("login-error");
+    const button = document.getElementById("login-btn");
+
+    if (!username || !password) {
+        errorMsg.textContent = "Both fields are required.";
+        return;
+    }
+
+    button.disabled = true;
+    errorMsg.textContent = "";
+
+    try {
+        const csrfToken = await getCSRFToken();
+
+        const response = await fetch("/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+            throw new Error("Invalid username or password.");
+        }
+
+        const data = await response.json();
+        localStorage.setItem("token", data.access_token);
+        window.location.href = "/dashboard";
+    } catch (err) {
+        errorMsg.textContent = err.message || "Login failed.";
+    } finally {
+        button.disabled = false;
+    }
+}
+</script>
+{% endblock %}
